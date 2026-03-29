@@ -117,8 +117,9 @@ label{
   top:50%;
   transform:translateY(-50%);
   color:#7dd3fc;
-  font-weight:700;
+  font-weight:800;
   pointer-events:none;
+  z-index:2;
 }
 
 input{
@@ -134,7 +135,7 @@ input{
 }
 
 .money-input{
-  padding-left:34px;
+  padding-left:38px;
 }
 
 input:focus{
@@ -299,7 +300,7 @@ button:hover{
         <label for="theirValue">Their card value</label>
         <div class="input-wrap">
           <span class="input-prefix">$</span>
-          <input class="money-input" id="theirValue" type="number" min="0" step="0.01" value="330" />
+          <input class="money-input" id="theirValue" type="number" min="0" step="1" inputmode="decimal" placeholder="Enter value" />
         </div>
         <div class="helper-chip">
           <div class="small-inline" id="tradeAdjustedText">Trade value: —</div>
@@ -310,18 +311,18 @@ button:hover{
         <label for="yourValue">Your card value (they want)</label>
         <div class="input-wrap">
           <span class="input-prefix">$</span>
-          <input class="money-input" id="yourValue" type="number" min="0" step="0.01" value="130" />
+          <input class="money-input" id="yourValue" type="number" min="0" step="1" inputmode="decimal" placeholder="Enter value" />
         </div>
       </div>
 
       <div class="field">
         <label for="tradePercent">Trade %</label>
-        <input id="tradePercent" type="number" min="0" step="0.01" value="80" />
+        <input id="tradePercent" type="number" min="0.01" step="1" value="80" inputmode="decimal" required />
       </div>
 
       <div class="field">
         <label for="cashPercent">Cash %</label>
-        <input id="cashPercent" type="number" min="0" step="0.01" value="70" />
+        <input id="cashPercent" type="number" min="0.01" step="1" value="70" inputmode="decimal" required />
       </div>
     </div>
 
@@ -397,7 +398,7 @@ function calculate(){
   const remainingValueEl = document.getElementById('remainingValue');
   const resultHintEl = document.getElementById('resultHint');
 
-  if(T <= 0){
+  if(!Number.isFinite(T) || T <= 0){
     tradeAdjustedEl.textContent = 'Trade value: —';
     cashLabelEl.textContent = 'Enter valid trade %';
     cashValueEl.textContent = '$0.00';
@@ -405,12 +406,19 @@ function calculate(){
     effectiveRateEl.textContent = '0.00%';
     effectiveRateEl.style.color = '';
     remainingValueEl.textContent = '$0.00';
-    resultHintEl.textContent = 'Trade % must be above 0.';
+    resultHintEl.textContent = 'Trade % must be above 0 and cannot be empty.';
     return;
   }
 
-  if(C < 0){
-    resultHintEl.textContent = 'Cash % cannot be negative.';
+  if(!Number.isFinite(C) || C <= 0){
+    tradeAdjustedEl.textContent = 'Trade value: —';
+    cashLabelEl.textContent = 'Enter valid cash %';
+    cashValueEl.textContent = '$0.00';
+    costBasisEl.textContent = '$0.00';
+    effectiveRateEl.textContent = '0.00%';
+    effectiveRateEl.style.color = '';
+    remainingValueEl.textContent = '$0.00';
+    resultHintEl.textContent = 'Cash % must be above 0 and cannot be empty.';
     return;
   }
 
@@ -448,8 +456,8 @@ function calculate(){
 }
 
 function resetForm(){
-  document.getElementById('theirValue').value = 330;
-  document.getElementById('yourValue').value = 130;
+  document.getElementById('theirValue').value = '';
+  document.getElementById('yourValue').value = '';
   document.getElementById('tradePercent').value = 80;
   document.getElementById('cashPercent').value = 70;
   calculate();
